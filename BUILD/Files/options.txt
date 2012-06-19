@@ -1,0 +1,14 @@
+Allergic
+	-1000
+Hate
+	-50
+Dislike
+	-20
+Neutral
+	0
+Like
+	5
+Love
+	15
+
+
