@@ -5,7 +5,9 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using ANDREICSLIB;
+using ANDREICSLIB.NewControls;
 using tree = ANDREICSLIB.DataClasses.Btree<System.String>;
+using SelectItem=ANDREICSLIB.NewControls.selectItemFromListBox.SelectItem;
 
 namespace Meal_Chooser_2
 {
@@ -35,10 +37,10 @@ namespace Meal_Chooser_2
             if (Directory.Exists(basepath) == false)
                 Directory.CreateDirectory(basepath);
 
-            FileUpdates.LoadFileIntoTree(ingredientpath, ingredientsRAW);
-            FileUpdates.LoadFileIntoTree(optionpath, optionsRAW);
-            FileUpdates.LoadFileIntoTree(mealpath, mealsRAW);
-            FileUpdates.LoadFileIntoTree(peoplepath, peopleRAW);
+            DataClasses.Btree.LoadFileIntoTree(ingredientpath, ingredientsRAW);
+            DataClasses.Btree.LoadFileIntoTree(optionpath, optionsRAW);
+            DataClasses.Btree.LoadFileIntoTree(mealpath, mealsRAW);
+            DataClasses.Btree.LoadFileIntoTree(peoplepath, peopleRAW);
 
             initPeopleList();
             UpdatePeopleTastePreferences();
@@ -56,45 +58,42 @@ namespace Meal_Chooser_2
             var mealname = gsb.ShowDialog("Enter name for new meal", "question");
             if (string.IsNullOrEmpty(mealname))
                 return;
-
-            var ingcat = new selectItemFromListBox();
-            var cats = new List<selectItemFromListBox.listboxitem>();
-            foreach (var c in mealsRAW.children) //meal categories
+            
+            var cats = new List<SelectItem>();
+            foreach (var c in mealsRAW.Children) //meal categories
             {
-                cats.Add(new selectItemFromListBox.listboxitem { text = c.name });
+                cats.Add(new SelectItem(c.Name,false));
             }
-
-            var catreturn = ingcat.ShowDialog("Select category of this meal", "question", cats, false, 1);
+            var catreturn=selectItemFromListBox.ShowDialog("Select category of this meal", "question", cats, false, 1);
 
             if (catreturn == null || catreturn.Count == 0)
                 return;
             var category = catreturn[0];
 
-            if (mealsRAW.children.Any(ch => ch.getChildByName(mealname) != null))
+            if (mealsRAW.Children.Any(ch => ch.GetChildByName(mealname) != null))
             {
                 MessageBox.Show("Error, meal with this name already exists in the category");
                 return;
             }
 
-            ingcat = new selectItemFromListBox();
-            cats = new List<selectItemFromListBox.listboxitem>();
-            foreach (var c2 in ingredientsRAW.children)
+            cats = new List<SelectItem>();
+            foreach (var c2 in ingredientsRAW.Children)
             {
-                foreach (var c in c2.children)
+                foreach (var c in c2.Children)
                 {
-                    cats.Add(new selectItemFromListBox.listboxitem { text = c.name });
+                    cats.Add(new SelectItem(c.Name,false));
                 }
             }
 
-            var ingredients = ingcat.ShowDialog("Select ingredients in this meal", "question", cats, true, 1);
+            var ingredients = selectItemFromListBox.ShowDialog("Select ingredients in this meal", "question", cats, true, 1);
 
             if (ingredients == null || ingredients.Count == 0)
                 return;
-            mealsRAW.getChildByName(category).addChild(mealname);
-            var t = mealsRAW.getChildByName(category).getChildByName(mealname);
+            mealsRAW.GetChildByName(category).AddChild(mealname);
+            var t = mealsRAW.GetChildByName(category).GetChildByName(mealname);
             foreach (var ingr in ingredients)
             {
-                t.addChild(ingr);
+                t.AddChild(ingr);
             }
 
             saveMeals();
@@ -102,22 +101,21 @@ namespace Meal_Chooser_2
 
         public static void editMeal(String mealstr)
         {
-            var ingcat = new selectItemFromListBox();
-            var cats = new List<selectItemFromListBox.listboxitem>();
+            var cats = new List<SelectItem>();
             var meal = getMeal(mealstr);
-            foreach (var c1 in ingredientsRAW.children)
+            foreach (var c1 in ingredientsRAW.Children)
             {
-                foreach (var c in c1.children)
+                foreach (var c in c1.Children)
                 {
                     var selected = false;
-                    if (meal.getChildByName(c.name) != null)
+                    if (meal.GetChildByName(c.Name) != null)
                         selected = true;
-                    cats.Add(new selectItemFromListBox.listboxitem { text = c.name, preselected = selected });
+                    cats.Add(new SelectItem(c.Name,selected));
                 }
             }
             cats.Sort();
 
-            var ingredients = ingcat.ShowDialog(
+            var ingredients = selectItemFromListBox.ShowDialog(
                 "Select ingredients you want to have in the meal. remove all ingredients to delete meal all together", "question",
                 cats, true, 0);
 
@@ -126,14 +124,14 @@ namespace Meal_Chooser_2
 
             if (ingredients.Count == 0)
             {
-                meal.parent.removeChild(meal.name);
+                meal.Parent.RemoveChild(meal.Name);
             }
             else
             {
-                meal.clearChildren();
+                meal.ClearChildren();
                 foreach (var c in ingredients)
                 {
-                    meal.addChild(c);
+                    meal.AddChild(c);
                 }
             }
             saveMeals();
@@ -141,11 +139,11 @@ namespace Meal_Chooser_2
 
         public static tree getMeal(String mealname)
         {
-            foreach (var v1 in mealsRAW.children)
+            foreach (var v1 in mealsRAW.Children)
             {
-                foreach (var v2 in v1.children)
+                foreach (var v2 in v1.Children)
                 {
-                    if (v2.name.Equals(mealname))
+                    if (v2.Name.Equals(mealname))
                         return v2;
                 }
             }
@@ -155,12 +153,12 @@ namespace Meal_Chooser_2
         private static void updatemeallistedit()
         {
             baseform.editmeallbox.Items.Clear();
-            foreach (var v in mealsRAW.children)
+            foreach (var v in mealsRAW.Children)
             {
-                foreach (var v2 in v.children)
+                foreach (var v2 in v.Children)
                 {
-                    if (baseform.editmeallbox.Items.Contains(v2.name) == false)
-                        baseform.editmeallbox.Items.Add(v2.name);
+                    if (baseform.editmeallbox.Items.Contains(v2.Name) == false)
+                        baseform.editmeallbox.Items.Add(v2.Name);
                 }
             }
             baseform.editmeallbox.Sorted = true;
@@ -168,7 +166,7 @@ namespace Meal_Chooser_2
 
         private static void saveMeals()
         {
-            FileUpdates.SaveFileIntoTree(mealpath, mealsRAW);
+            DataClasses.Btree.SaveFileIntoTree(mealpath, mealsRAW);
             updatemeallistedit();
         }
 
@@ -201,21 +199,20 @@ namespace Meal_Chooser_2
                 var res=gsb.ShowDialog("Enter Category Name to create:", "Edit Category");
                 if (string.IsNullOrWhiteSpace(res))
                     return;
-                if (ingredientsRAW.children.Any(s=>s.name.Equals(res)))
+                if (ingredientsRAW.Children.Any(s=>s.Name.Equals(res)))
                 {
                     MessageBox.Show("Error, a category with that name already exists");
                     return;
                 }
 
-                ingredientsRAW.addChild(res);
+                ingredientsRAW.AddChild(res);
             }
             
             else if (mmb.Result.Equals(ren))
             {
                 var cats = GetCategoryList();
 
-                var sz = new selectItemFromListBox();
-                var res = sz.ShowDialog("Select category to rename", "Rename Category", cats, false, 1);
+                var res = selectItemFromListBox.ShowDialog("Select category to rename", "Rename Category", cats, false, 1);
                 if (res == null)
                     return;
 
@@ -225,7 +222,7 @@ namespace Meal_Chooser_2
                 if (string.IsNullOrWhiteSpace(res2))
                     return;
 
-                if (ingredientsRAW.children.Any(s => s.name.Equals(res)))
+                if (ingredientsRAW.Children.Any(s => s.Name.Equals(res)))
                 {
                     MessageBox.Show("Error, a category with that name already exists");
                     return;
@@ -233,7 +230,7 @@ namespace Meal_Chooser_2
 
                 try
                 {
-                    ingredientsRAW.children.Where(s => s.name.Equals(res)).First().name = res2;
+                    ingredientsRAW.Children.Where(s => s.Name.Equals(res)).First().Name = res2;
                 }
                 catch (Exception ex)
                 {
@@ -246,14 +243,13 @@ namespace Meal_Chooser_2
             {
                 var cats = GetCategoryList();
 
-                var s = new selectItemFromListBox();
-                var res=s.ShowDialog("Select category to delete", "Delete Category", cats, false, 1);
+                var res = selectItemFromListBox.ShowDialog("Select category to delete", "Delete Category", cats, false, 1);
                 if (res==null)
                 return;
 
                 foreach(var cat in res)
                 {
-                    ingredientsRAW.removeChild(cat);
+                    ingredientsRAW.RemoveChild(cat);
                 }
             }
 
@@ -266,13 +262,13 @@ namespace Meal_Chooser_2
             initIngrList();
             initSubIngr();
         }
-
-        public static List<selectItemFromListBox.listboxitem> GetCategoryList()
+        
+        public static List<SelectItem> GetCategoryList()
         {
-            var cats = new List<selectItemFromListBox.listboxitem>();
-            foreach (var c in ingredientsRAW.children)
+            var cats = new List<SelectItem>();
+            foreach (var c in ingredientsRAW.Children)
             {
-                cats.Add(new selectItemFromListBox.listboxitem { text = c.name });
+                cats.Add(new SelectItem(c.Name,false));
             }
             return cats;
         }
@@ -284,26 +280,25 @@ namespace Meal_Chooser_2
             if (string.IsNullOrEmpty(option))
                 return;
 
-            var ingcat = new selectItemFromListBox();
             var cats = GetCategoryList();
 
-            var catreturn = ingcat.ShowDialog("Select categories that include this ingredient", "question", cats, true,
+            var catreturn = selectItemFromListBox.ShowDialog("Select categories that include this ingredient", "question", cats, true,
                                                        1);
 
             if (catreturn == null || catreturn.Count == 0)
                 return;
 
-            foreach (var ch in ingredientsRAW.children)
+            foreach (var ch in ingredientsRAW.Children)
             {
-                if (ch.getChildByName(option) != null)
+                if (ch.GetChildByName(option) != null)
                 {
-                    MessageBox.Show("Error, ingredient:" + option + " exists already in category:" + ch.name);
+                    MessageBox.Show("Error, ingredient:" + option + " exists already in category:" + ch.Name);
                     return;
                 }
             }
             foreach (var catr in catreturn)
             {
-                ingredientsRAW.getChildByName(catr).addChild(option);
+                ingredientsRAW.GetChildByName(catr).AddChild(option);
             }
 
             saveFileIngredients();
@@ -313,54 +308,53 @@ namespace Meal_Chooser_2
         {
             var ingr = baseform.editingrbox.SelectedItem.ToString();
 
-            var ingcat = new selectItemFromListBox();
-            var cats = new List<selectItemFromListBox.listboxitem>();
-            foreach (var c in ingredientsRAW.children)
+            var cats = new List<SelectItem>();
+            foreach (var c in ingredientsRAW.Children)
             {
                 var selected = false;
-                if (c.getChildByName(ingr) != null)
+                if (c.GetChildByName(ingr) != null)
                     selected = true;
-                cats.Add(new selectItemFromListBox.listboxitem { text = c.name, preselected = selected });
+                cats.Add(new SelectItem(c.Name,selected));
             }
 
             var catreturn =
-                ingcat.ShowDialog(
+                selectItemFromListBox.ShowDialog(
                     "Select categories you want to have the ingredient in. remove all categories to delete ingredient all together",
                     "question", cats, true, 0);
 
             if (catreturn == null)
                 return;
 
-            foreach (var c in ingredientsRAW.children)
+            foreach (var c in ingredientsRAW.Children)
             {
                 //delete ingr category if not selected
-                if (c.getChildByName(ingr) != null && catreturn.Contains(c.name) == false)
+                if (c.GetChildByName(ingr) != null && catreturn.Contains(c.Name) == false)
                 {
-                    c.removeChild(ingr);
+                    c.RemoveChild(ingr);
                     peopleRemoveIng(ingr);
                 }
                 //add if not there to start
-                if (c.getChildByName(ingr) == null && catreturn.Contains(c.name))
-                    c.addChild(ingr);
+                if (c.GetChildByName(ingr) == null && catreturn.Contains(c.Name))
+                    c.AddChild(ingr);
             }
             saveFileIngredients();
         }
 
         private static void initIngrList()
         {
-            if (ingredientsRAW.children == null)
+            if (ingredientsRAW.Children == null)
                 return;
             baseform.ingredientlistbox.Items.Clear();
             baseform.mealchecklist.Items.Clear();
-            foreach (var t in ingredientsRAW.children)
+            foreach (var t in ingredientsRAW.Children)
             {
-                baseform.ingredientlistbox.Items.Add(t.name);
+                baseform.ingredientlistbox.Items.Add(t.Name);
             }
 
             var a = 0;
-            foreach (var m in mealsRAW.children)
+            foreach (var m in mealsRAW.Children)
             {
-                baseform.mealchecklist.Items.Add(m.name);
+                baseform.mealchecklist.Items.Add(m.Name);
                 baseform.mealchecklist.SetItemChecked(a, true);
                 a++;
             }
@@ -373,47 +367,48 @@ namespace Meal_Chooser_2
             baseform.subingrpanel.Controls.Clear();
 
             //get list of sub ingredients for selected ingredient type
-            var ing = ingredientsRAW.getChildByName(baseform.ingredientlistbox.SelectedItem.ToString());
+            var ing = ingredientsRAW.GetChildByName(baseform.ingredientlistbox.SelectedItem.ToString());
             if (ing == null)
                 return;
 
             //get the list of options
-            var op = optionsRAW.children;
+            var op = optionsRAW.Children;
 
             ////var vs = new VScrollBar();
             //vs.Dock = DockStyle.Right;
             //subingrpanel.Controls.Add(vs);
 
-            foreach (var v in ing.children)
+            foreach (var v in ing.Children)
             {
                 var c = op.Count;
                 var count = 0;
-                var gp = new PanelUpdates();
+
+                var gp = new PanelReplacement();
                 gp.borderWidth = 1;
                 gp.Width = baseform.subingrpanel.Width;
                 gp.Height = 1;
 
                 gp.Anchor = AnchorStyles.Right;
-                var l = new Label { Height = 20, Text = v.name };
+                var l = new Label { Height = 20, Text = v.Name };
                 gp.addControl(l, true, 10, 20);
 
                 gp.bumpLastPosition(0, -5);
                 var acheck = false;
-                var middle = MathUpdates.Ceiling(op.Count / 2);
+                var middle = MathExtras.Ceiling(op.Count / 2);
                 RadioButton middleRB = null;
                 foreach (var o in op)
                 {
                     var rb = new RadioButton();
                     rb.Click += Form1.rb_Click;
                     rb.Width = 100;
-                    rb.BackColor = ColorUpdates.getColourFromInt(int.Parse(o.children[0].name));
-                    rb.ForeColor = ColorUpdates.getNegative(rb.BackColor);
+                    rb.BackColor = ColorExtras.getColourFromInt(int.Parse(o.Children[0].Name));
+                    rb.ForeColor = ColorExtras.getNegative(rb.BackColor);
                     //link to person
-                    var p = peopleRAW.getChildByName(baseform.peoplelist.Text);
-                    var p1 = p.getChildByName(o.name);
+                    var p = peopleRAW.GetChildByName(baseform.peoplelist.Text);
+                    var p1 = p.GetChildByName(o.Name);
                     if (p1 != null && acheck == false)
                     {
-                        var p2 = p1.getChildByName(v.name);
+                        var p2 = p1.GetChildByName(v.Name);
                         if (p2 != null)
                         {
                             rb.Checked = true;
@@ -425,7 +420,7 @@ namespace Meal_Chooser_2
 
                     rb.Tag = p;
                     rb.Name = l.Text;
-                    rb.Text = o.name;
+                    rb.Text = o.Name;
                     gp.addControl(rb, count != (c - 1));
                     count++;
                 }
@@ -448,15 +443,15 @@ namespace Meal_Chooser_2
         private static void updateingrlistedit()
         {
             baseform.editingrbox.Items.Clear();
-            foreach (var v in ingredientsRAW.children)
+            foreach (var v in ingredientsRAW.Children)
             {
-                if (v.children == null)
-                    v.children = new List<tree>();
+                if (v.Children == null)
+                    v.Children = new List<tree>();
 
-                foreach (var v2 in v.children)
+                foreach (var v2 in v.Children)
                 {
-                    if (baseform.editingrbox.Items.Contains(v2.name) == false)
-                        baseform.editingrbox.Items.Add(v2.name);
+                    if (baseform.editingrbox.Items.Contains(v2.Name) == false)
+                        baseform.editingrbox.Items.Add(v2.Name);
                 }
             }
             baseform.editingrbox.Sorted = true;
@@ -464,7 +459,7 @@ namespace Meal_Chooser_2
 
         private static void saveFileIngredients()
         {
-            FileUpdates.SaveFileIntoTree(ingredientpath, ingredientsRAW);
+            DataClasses.Btree.SaveFileIntoTree(ingredientpath, ingredientsRAW);
             updateingrlistedit();
         }
 
@@ -474,35 +469,35 @@ namespace Meal_Chooser_2
 
         public static void editPeopleIngredient(tree person, String ingr, String option)
         {
-            if (person.children != null)
+            if (person.Children != null)
             {
-                foreach (var o in person.children) //for each option remove ingr if exists
+                foreach (var o in person.Children) //for each option remove ingr if exists
                 {
-                    var i = o.getChildByName(ingr);
+                    var i = o.GetChildByName(ingr);
                     if (i != null)
-                        o.children.Remove(i);
+                        o.Children.Remove(i);
                 }
             }
 
-            if (person.getChildByName(option) == null)
-                person.addChild(option);
-            person.getChildByName(option).addChild(ingr);
+            if (person.GetChildByName(option) == null)
+                person.AddChild(option);
+            person.GetChildByName(option).AddChild(ingr);
             saveFilePeople();
         }
 
         private static void initPeopleList()
         {
-            if (peopleRAW.children == null)
+            if (peopleRAW.Children == null)
                 return;
 
             var s = baseform.peoplelist.Text;
             baseform.peoplelist.Items.Clear();
             baseform.peoplecheckbox.Items.Clear();
             var a = 0;
-            foreach (var t in peopleRAW.children)
+            foreach (var t in peopleRAW.Children)
             {
-                baseform.peoplelist.Items.Add(t.name);
-                baseform.peoplecheckbox.Items.Add(t.name);
+                baseform.peoplelist.Items.Add(t.Name);
+                baseform.peoplecheckbox.Items.Add(t.Name);
                 baseform.peoplecheckbox.SetItemChecked(a, true);
                 a++;
             }
@@ -521,7 +516,7 @@ namespace Meal_Chooser_2
             if (string.IsNullOrEmpty(option))
                 return;
 
-            peopleRAW.addChild(option);
+            peopleRAW.AddChild(option);
             saveFilePeople();
             initPeopleList();
             if (baseform.peoplelist.Items.Count == 1)
@@ -532,7 +527,7 @@ namespace Meal_Chooser_2
 
         private static void saveFilePeople()
         {
-            FileUpdates.SaveFileIntoTree(peoplepath, peopleRAW);
+            DataClasses.Btree.SaveFileIntoTree(peoplepath, peopleRAW);
         }
 
         #endregion
@@ -540,24 +535,24 @@ namespace Meal_Chooser_2
         #region chart
         private static Dictionary<string, Dictionary<string, int>> getRawChartValues()
         {
-            var values = new DictionaryUpdates<string, Dictionary<string, int>>(); //meal to points
+            var values = new Dictionary<string, Dictionary<string, int>>(); //meal to points
 
-            foreach (var i in mealsRAW.children) //each meal type
+            foreach (var i in mealsRAW.Children) //each meal type
             {
-                if (baseform.mealchecklist.CheckedItems.Contains(i.name) == false)
+                if (baseform.mealchecklist.CheckedItems.Contains(i.Name) == false)
                     continue;
 
-                foreach (var i2 in i.children) //each meal name
+                foreach (var i2 in i.Children) //each meal name
                 {
-                    if (values.ContainsKey(i2.name) == false)
-                        values.Add(i2.name, new Dictionary<string, int>());
+                    if (values.ContainsKey(i2.Name) == false)
+                        values.Add(i2.Name, new Dictionary<string, int>());
 
-                    foreach (var p in peopleRAW.children) //each person
+                    foreach (var p in peopleRAW.Children) //each person
                     {
-                        if (baseform.peoplecheckbox.CheckedItems.Contains(p.name) == false)
+                        if (baseform.peoplecheckbox.CheckedItems.Contains(p.Name) == false)
                             continue;
 
-                        values[i2.name][p.name] = getPersonMealValue(i2, p);
+                        values[i2.Name][p.Name] = getPersonMealValue(i2, p);
                     }
                 }
             }
@@ -576,7 +571,7 @@ namespace Meal_Chooser_2
             {
                 //get total point value for all people
                 var totalval = v.Value.Sum(person => person.Value);
-                totalval /= peopleRAW.children.Count;
+                totalval /= peopleRAW.Children.Count;
 
                 if (minset == false || fmin > totalval)
                 {
@@ -639,7 +634,7 @@ namespace Meal_Chooser_2
             {
                 s.Points.AddXY(kvp.Key, kvp.Value);
                 var dpc = s.Points[s.Points.Count - 1];
-                dpc.Color = ColorUpdates.getColourFromInt(kvp.Value);
+                dpc.Color = ColorExtras.getColourFromInt(kvp.Value);
                 dpc.ToolTip = getToolTip(kvp.Key);
             }
 
@@ -662,11 +657,11 @@ namespace Meal_Chooser_2
         private static string getOption(int value)
         {
             var count = 0;
-            foreach (var op in optionsRAW.children)
+            foreach (var op in optionsRAW.Children)
             {
-                if (value <= int.Parse(op.children[0].name) || (count == optionsRAW.children.Count - 1))
+                if (value <= int.Parse(op.Children[0].Name) || (count == optionsRAW.Children.Count - 1))
                 {
-                    return op.name;
+                    return op.Name;
                 }
                 count++;
             }
@@ -678,13 +673,13 @@ namespace Meal_Chooser_2
         private static void peopleRemoveIng(string ing)
         {
             var change = false;
-            foreach (var v in peopleRAW.children) //people
+            foreach (var v in peopleRAW.Children) //people
             {
-                foreach (var v2 in v.children) //options
+                foreach (var v2 in v.Children) //options
                 {
-                    if (v2.getChildByName(ing) != null)
+                    if (v2.GetChildByName(ing) != null)
                     {
-                        v2.removeChild(ing);
+                        v2.RemoveChild(ing);
                         change = true;
                     }
                 }
@@ -700,13 +695,13 @@ namespace Meal_Chooser_2
         private static int getPersonMealValue(tree meal, tree person)
         {
             var score = 0;
-            foreach (var i3 in meal.children) //meal ingredient
+            foreach (var i3 in meal.Children) //meal ingredient
             {
-                foreach (var op in person.children) //each ingredient option type
+                foreach (var op in person.Children) //each ingredient option type
                 {
-                    var val = int.Parse(optionsRAW.getChildByName(op.name).children[0].name); //option point value
+                    var val = int.Parse(optionsRAW.GetChildByName(op.Name).Children[0].Name); //option point value
                     //if the meal ingr is in this persons option, add the opion value to the mean
-                    if (op.getChildByName(i3.name) != null)
+                    if (op.GetChildByName(i3.Name) != null)
                     {
                         score += val;
                     }
