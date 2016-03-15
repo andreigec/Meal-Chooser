@@ -1,5 +1,3 @@
-
-/SOURCE/_ReSharper.Meal Chooser
-/SOURCE/Meal Chooser.6.0.ReSharper.user
-/SOURCE/Meal Chooser/bin
-/SOURCE/Meal Chooser/obj
+*.suo
+bin
+obj
