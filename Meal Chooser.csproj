@@ -69,7 +69,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="controller.cs" />
+    <Compile Include="Controller\controller.cs" />
+    <Compile Include="Controller\Charts.cs" />
+    <Compile Include="Controller\Data.cs" />
+    <Compile Include="Controller\Ingredient.cs" />
+    <Compile Include="Controller\IngredientCategory.cs" />
+    <Compile Include="Controller\Meal.cs" />
+    <Compile Include="Controller\MealCategory.cs" />
+    <Compile Include="Controller\People.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

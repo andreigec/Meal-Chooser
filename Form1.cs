@@ -2,7 +2,9 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using ANDREICSLIB.Helpers;
 using ANDREICSLIB.Licensing;
+using Meal_Chooser.Controller;
 using tree = ANDREICSLIB.Helpers.Btree<System.String>;
 
 namespace Meal_Chooser
@@ -42,10 +44,10 @@ Zip Assets © SharpZipLib (http://www.sharpdevelop.net/OpenSource/SharpZipLib/)
         private void Form1_Load(object sender, EventArgs e)
         {
             controller.baseform = this;
-            controller.initFiles();
+            AsyncHelpers.RunSync(controller.initFiles);
             Licensing.LicensingForm(this, menuStrip1, HelpString, OtherText);
         }
-        
+
         public static void rb_Click(object sender, EventArgs e)
         {
             //copy changes to people structure
@@ -60,22 +62,22 @@ Zip Assets © SharpZipLib (http://www.sharpdevelop.net/OpenSource/SharpZipLib/)
         {
             if (ingredientlistbox.SelectedIndex == -1)
                 return;
-            controller.initSubIngr();
+            //    controller.initSubIngr();
         }
 
         private void comparebutton_Click(object sender, EventArgs e)
         {
-            controller.setChart();
+            //  controller.setChart();
         }
 
         private void peoplelist_SelectedIndexChanged(object sender, EventArgs e)
         {
-            controller.initSubIngr();
+            // controller.initSubIngr();
         }
 
         private void newbutton_Click(object sender, EventArgs e)
         {
-            controller.createNewPerson();
+            //  controller.createNewPerson();
         }
 
         private void addingrbutton_Click(object sender, EventArgs e)
