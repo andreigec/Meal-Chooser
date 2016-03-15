@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using ANDREICSLIB;
 using ANDREICSLIB.Licensing;
-using Meal_Chooser.ServiceReference1;
 using tree = ANDREICSLIB.Helpers.Btree<System.String>;
 
 namespace Meal_Chooser_2
