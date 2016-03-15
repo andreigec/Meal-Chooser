@@ -4,4 +4,4 @@ Meal Chooser lets people input their ingredient preferences/hates, then cross re
 
 Images
 ======
-![mc1](https://github.com/EvilSeven/Meal-Chooser/raw/master/INFO/MC1.jpg)
+![mc1](https://cloud.githubusercontent.com/assets/1860848/13765957/fb9cd7b6-eab1-11e5-9bfa-5bb67fbcd202.png)
